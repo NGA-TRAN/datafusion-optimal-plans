@@ -1,7 +1,5 @@
 Assume you have created tables `dimension_parquet` and `dimension_parquet_sorted` shown in the file `2_cli_create_tables.md`
 
-### Understand SortPreservingMergeExec
-
 ```SQL
 SELECT * FROM dimension_parquet_sorted WHERE service = 'log' ORDER BY env, service, host;
 +--------+------+---------+------+
@@ -11,7 +9,12 @@ SELECT * FROM dimension_parquet_sorted WHERE service = 'log' ORDER BY env, servi
 | B      | prod | log     | ma   |
 | C      | prod | log     | vim  |
 +--------+------+---------+------+
+```
 
+## Understand SortPreservingMergeExec
+
+
+```SQL
 
 -- SortPreservingMergeExec: Merge already-sorted streams
 EXPLAIN SELECT * FROM dimension_parquet_sorted WHERE service = 'log' ORDER BY env, service, host;
@@ -33,7 +36,8 @@ EXPLAIN SELECT * FROM dimension_parquet_sorted WHERE service = 'log' ORDER BY en
 ```
 
 ```SQL
--- Need to sort the streams before merging them
+-- Need to sort EACH streams before merging
+--    preserve_partitioning=[true]
 EXPLAIN SELECT * FROM dimension_parquet WHERE service = 'log' ORDER BY env, service, host;
 +---------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | plan_type     | plan                                                                                                                                                                                                                                                                                                                                                                                |

@@ -1,8 +1,8 @@
-### Start CLI
+## Start CLI
 `datafusion-cli --maxrows 100`
 
 
-### Create tables from single file
+## Create tables from single file
 
 - From CSV file
 
@@ -15,6 +15,7 @@ OPTIONS ('format.has_header' 'true');
 
 
 -- Sorted
+-- Note: Your data in the file must be sorted
 CREATE EXTERNAL TABLE  dimension_csv_sorted
 STORED AS CSV 
 WITH ORDER (env, service, host)
@@ -32,13 +33,14 @@ LOCATION '/Users/hoabinhnga.tran/datafusion-optimal-plans/testdata/dimension1/di
 
 
 -- Sorted
+-- Note: Your data in the file must be sorted
 CREATE EXTERNAL TABLE  dimension_parquet_sorted
 STORED AS Parquet
 WITH ORDER (env, service, host)
 LOCATION '/Users/hoabinhnga.tran/datafusion-optimal-plans/testdata/dimension1/dimension_1.parquet';
 ```
 
-### Explore the tables
+## Explore the tables
 
 ```SQL
 show tables;
@@ -73,7 +75,7 @@ select * from information_schema.views;
 | datafusion    | public       | dimension_csv            | CREATE EXTERNAL TABLE dimension_csv STORED AS CSV LOCATION /Users/hoabinhnga.tran/datafusion-optimal-plans/testdata/dimension1/dimension_1.csv                     |
 +---------------+--------------+--------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
--- TODO: Create a ticket in upstream datafusion to display `WITH ORDER ...` when applicable
+-- BUG: https://github.com/apache/datafusion/issues/18267
 ```
 
 ```SQL
@@ -114,7 +116,7 @@ select * from dimension_parquet;
 4 row(s) fetched. 
 ```
 
-### Create tables for many files in a folder
+## Create tables for many files in a folder
 
 ```SQL
 -- fact2 folder has 2 parquet files
@@ -124,7 +126,7 @@ WITH ORDER (f_dkey, timestamp)
 LOCATION '/Users/hoabinhnga.tran/datafusion-optimal-plans/testdata/fact2';
 ```
 
-### Create tables & Insert data
+## Create tables & Insert data
 
 **Note:** cannot specify sort order in this case
 

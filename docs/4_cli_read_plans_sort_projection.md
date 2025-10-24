@@ -1,7 +1,7 @@
 Assume you have created tables `dimension_csv` and  `dimension_csv_sorted` shown in the file `2_cli_create_tables.md`
 
 
-### Table is not sorted
+## Table is not sorted
 
 ```SQL
 SELECT * FROM dimension_csv ORDER BY env, service, host;
@@ -30,7 +30,7 @@ EXPLAIN SELECT * FROM dimension_csv ORDER BY env, service, host;
 2 row(s) fetched. 
 ```
 
-### Table is sorted on env, service, host
+## Table is sorted on env, service, host
 
 ```SQL
 SELECT * FROM dimension_csv_sorted ORDER BY env, service, host;
@@ -57,7 +57,7 @@ EXPLAIN SELECT * FROM dimension_csv_sorted ORDER BY env, service, host;
 2 row(s) fetched.
 ```
 
-### Good Subset of Sort Order
+## Good Subset of Sort Order
 
 ```SQL
 SELECT * FROM dimension_csv_sorted ORDER BY env, service;
@@ -84,7 +84,7 @@ EXPLAIN SELECT * FROM dimension_csv_sorted ORDER BY env, service;
 
 ```
 
-### Bad Subset of Sort Order
+## Bad Subset of Sort Order
 
 ```SQL
 SELECT * FROM dimension_csv_sorted ORDER BY env, host;
@@ -110,7 +110,7 @@ EXPLAIN SELECT * FROM dimension_csv_sorted ORDER BY env, host;
 +---------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 ```
 
-### Projection
+## Projection
 
 ```SQL
 SELECT host, env FROM dimension_csv_sorted ORDER BY env, service;
@@ -124,7 +124,8 @@ SELECT host, env FROM dimension_csv_sorted ORDER BY env, service;
 +------+------+
 4 row(s) fetched. 
 
--- Still has knowledge of sort order
+-- 1. Projection push-down
+-- 2. Still has knowledge of sort order
 EXPLAIN SELECT host, env FROM dimension_csv_sorted ORDER BY env, service;
 +---------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | plan_type     | plan                                                                                                                                                                                                                          |

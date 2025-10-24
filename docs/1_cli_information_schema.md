@@ -1,14 +1,10 @@
-### Install and run datafusion-cli
+## Install and run datafusion-cli
 
-**Install datafusion-cli:** `cargo install datafusion-cli`
+- Install:  `cargo install datafusion-cli`
+  Or build it from the repo `https://github.com/apache/datafusion`. Remember to `cd datafusion-cli` and run `cargo build`
+- Run:  `datafusion-cli` or `datafusion-cli --maxrows 100` to display max 100 rows per command
 
-Or build it from the repo `https://github.com/apache/datafusion`. Remember to `cd datafusion-cli` and run `cargo build`
-
-**Run datafusion-cli:** `datafusion-cli`
-
-or `datafusion-cli --maxrows 100` to display max 100 rows per command
-
-### Common CLI commands
+## Common CLI commands
 
 ```SQL
 show tables;
@@ -51,9 +47,9 @@ select * from information_schema.columns;
 select * from information_schema.schemata;
 ```
 
-### Configuration Parameters
+## Configuration Parameters
 
-#### See all params:
+### See all params:
 
 ```SQL
 select * from information_schema.df_settings;
@@ -66,7 +62,7 @@ select * from information_schema.df_settings;
 | ... (additional rows truncated for brevity)
 ```
 
-#### See specific params:
+### See specific params:
 
 ```SQL
 select * from information_schema.df_settings where name = 'datafusion.execution.batch_size';
@@ -97,7 +93,7 @@ select * from information_schema.df_settings where name = 'datafusion.execution.
 +----------------------------------------+-------+---------------------------------------------------------------------------------------------------------------------------------------------+
 ```
 
-#### Set value for the config params
+### Set values for the config params
 
 ```SQL
 set datafusion.execution.batch_size=4096;
@@ -116,7 +112,7 @@ select * from information_schema.df_settings where name = 'datafusion.execution.
 3 row(s) fetched. 
 ```
 
-### Other commands:
+## Other commands:
 
 ```SQL
 select * from information_schema.routines;
@@ -124,7 +120,7 @@ select * from information_schema.parameters;
 ```
 
 
-### Some tricks to see schema
+## Some tricks to see schema
 
 ```SQL
 select * from information_schema.df_settings limit 0;
@@ -147,7 +143,7 @@ select * from information_schema.df_settings limit 1;
 1 row(s) fetched. 
 ```
 
-### Quit the CLI
+## Quit the CLI
 
 ```SQL
 \q

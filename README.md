@@ -8,4 +8,4 @@ This repo explores how to optimize query plans in DataFusion, starting with foun
 - Tuning for parallel execution
 - Building and running distributed plans
 
-Start with the doc folder—each .md file introduces a focused topic, showing how to run queries in datafusion-cli or linking to test files for scenarios not supported via CLI.
+Start with the docs folder—each .md file introduces a focused topic, showing how to run queries in datafusion-cli or linking to test files for scenarios not supported via CLI.

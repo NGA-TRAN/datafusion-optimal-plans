@@ -1,7 +1,7 @@
 Assume you have created tables `dimension_csv` and  `dimension_csv_sorted` and `dimension_parquet_sorted` shown in the file `2_cli_create_tables.md`
 
 
-### Filter Data
+## Filter Data
 
 ```SQL
 SELECT * FROM dimension_csv_sorted WHERE service = 'log';
@@ -15,12 +15,14 @@ SELECT * FROM dimension_csv_sorted WHERE service = 'log';
 3 row(s) fetched. 
 ```
 
-### Understand RepartitionExec & CoalesceBatchesExec
+## Understand RepartitionExec & CoalesceBatchesExec
 
 ```SQL
---  RepartitionExec: partitioning=RoundRobinBatch(16): Split 1 stream/partition into 16 streams/partitions in round robin fashion
---     Still preserve order of the streams 
---  CoalesceBatchesExec: target_batch_size=8192: Collect data of EACH stream to 8192(bytes?) before pushing up
+--  1. RepartitionExec: partitioning=RoundRobinBatch(16):
+--        . Split 1 stream/partition into 16 streams/partitions in round robin fashion
+--        . Still preserve order of the streams 
+--  2. CoalesceBatchesExec: target_batch_size=8192: 
+--        . Accumulate data of EACH stream to 8192(bytes?) before pushing up
 
 EXPLAIN SELECT * FROM dimension_csv_sorted WHERE service = 'log';
 +---------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
@@ -38,7 +40,7 @@ EXPLAIN SELECT * FROM dimension_csv_sorted WHERE service = 'log';
 
 ```
 
-### Why Repartitioned to 16 of them?
+## Why Repartitioned to 16 of them?
 
 Default - 16 : number of CPUs
 
@@ -52,7 +54,7 @@ select * from information_schema.df_settings where name = 'datafusion.execution.
 ```
 
 
-### Why target_batch_size=8192 
+## Why target_batch_size=8192 
 
 Default setting 
 
@@ -65,7 +67,7 @@ select * from information_schema.df_settings where name = 'datafusion.execution.
 +---------------------------------+-------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 ```
 
-### Change config params
+## Change config params
 
 ```SQL
 set datafusion.execution.batch_size=4096;
@@ -87,7 +89,7 @@ EXPLAIN SELECT * FROM dimension_csv_sorted WHERE service = 'log';
 ```
 
 
-### Filter Push Down
+## Filter Push Down
 
 ```SQL
 -- Parquet has statistics --> BloomFilter-like Pushdown
