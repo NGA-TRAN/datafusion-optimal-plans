@@ -1,4 +1,4 @@
-Assume you have created tables `dimension_parquet` and `dimension_parquet_sorted` shown in the file `2_cli_create_tables.md`
+Assume you have created tables ` dimension_csv`,  `dimension_parquet` and `dimension_parquet_sorted` shown in the file `2_cli_create_tables.md`
 
 ```SQL
 SELECT env, count(*) FROM dimension_parquet_sorted GROUP BY env;
@@ -162,7 +162,7 @@ Figure: Sub-optimal Pre-Sorted Aggregation
 
 1. Use `Single` aggregate & pipeline as in `Figure: Aggregation's Group-By Pipeline`
 
-2. Split file groups into sorted N + target_partitions (N = 1, 2, 3, ...)
+2. Split file groups into sorted N * target_partitions (N = 1, 2, 3, ...)
 
    This strategy is especially effective when data files are already partitioned and sorted by the group-by key.
 
