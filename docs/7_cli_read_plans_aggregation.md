@@ -35,6 +35,13 @@ EXPLAIN SELECT env, count(*) FROM dimension_parquet_sorted GROUP BY env;
 |               |                                                                                                                                                                                                                    |
 +---------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 2 row(s) fetched. 
+```
+
+![GroupByPipeline](GroupByPipeline.png)
+
+Figure: Aggregation's Group-By Pipeline
+
+```SQL
 
 -- Data is NOT sorted on the group-by column
 --   --> Group-By Hash: Build hash table for the group-by keys and map values there
@@ -53,34 +60,47 @@ EXPLAIN SELECT env, count(*) FROM dimension_parquet GROUP BY env;
 2 row(s) fetched. 
 ```
 
+![GroupByHash](GroupByHash.png)
 
-## Three-step GroupBy: Partial Group-By, Repartition,  Final Group-By
+Figure: Aggregation's Group-By Hash
+
+## Multi-step Aggregation: Partial & Final
+
 
 ```SQL
--- Want to handle data in many partitions/streams and dta is not yet sorted on group-by key
-EXPLAIN SELECT env, count(*) FROM dimension_parquet GROUP BY env;
-+---------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| plan_type     | plan                                                                                                                                                                               |
-+---------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| logical_plan  | Projection: dimension_parquet.env, count(Int64(1)) AS count(*)                                                                                                                     |
-|               |   Aggregate: groupBy=[[dimension_parquet.env]], aggr=[[count(Int64(1))]]                                                                                                           |
-|               |     TableScan: dimension_parquet projection=[env]                                                                                                                                  |
-| physical_plan | ProjectionExec: expr=[env@0 as env, count(Int64(1))@1 as count(*)]                                                                                                                 |
-|               |   AggregateExec: mode=FinalPartitioned, gby=[env@0 as env], aggr=[count(Int64(1))]      -- Step 3: Final Group-By                                                                  |
-|               |     CoalesceBatchesExec: target_batch_size=8192                                                                              -- Remember what this does?                           |
-|               |       RepartitionExec: partitioning=Hash([env@0], 16), input_partitions=16              -- Step 2: Repartition on the group-by key                                                 |
-|               |         -- RepartitionExec: partitioning=RoundRobinBatch(16), input_partitions=1                                             -- Ignore this line for now. Will be explained next   |
-|               |           AggregateExec: mode=Partial, gby=[env@0 as env], aggr=[count(Int64(1))]       -- Step 1: Partial Group-By                                                                |
-|               |             DataSourceExec: file_groups={1 group: [[Users/hoabinhnga.tran/datafusion-optimal-plans/testdata/dimension1/dimension_1.parquet]]}, projection=[env], file_type=parquet |
-|               |                                                                                                                                                                                    |
-+---------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+-- Reset to default value
+set datafusion.execution.target_partitions = 16;
+
+-- Want to handle data in many partitions/streams and data is not yet sorted on group-by key
+EXPLAIN SELECT env, count(*) FROM dimension_csv GROUP BY env;
++---------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| plan_type     | plan                                                                                                                                                                                        |
++---------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| logical_plan  | Projection: dimension_csv.env, count(Int64(1)) AS count(*)                                                                                                                                  |
+|               |   Aggregate: groupBy=[[dimension_csv.env]], aggr=[[count(Int64(1))]]                                                                                                                        |
+|               |     TableScan: dimension_csv projection=[env]                                                                                                                                               |
+| physical_plan | ProjectionExec: expr=[env@0 as env, count(Int64(1))@1 as count(*)]                                                                                                                          |
+|               |   AggregateExec: mode=FinalPartitioned, gby=[env@0 as env], aggr=[count(Int64(1))]                                                                                                          |
+|               |     CoalesceBatchesExec: target_batch_size=8192                                                                                                                                             |
+|               |       RepartitionExec: partitioning=Hash([env@0], 16), input_partitions=16                                                                                                                  |
+|               |         AggregateExec: mode=Partial, gby=[env@0 as env], aggr=[count(Int64(1))]                                                                                                             |
+|               |           RepartitionExec: partitioning=RoundRobinBatch(16), input_partitions=1                                                                                                             |
+|               |             DataSourceExec: file_groups={1 group: [[Users/hoabinhnga.tran/datafusion-optimal-plans/testdata/dimension1/dimension_1.csv]]}, projection=[env], file_type=csv, has_header=true |
+|               |                                                                                                                                                                                             |
++---------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 2 row(s) fetched. 
+
 ```
+
+![MultiStepAggregate](MultiStepAggregate.png)
+
+Figure: Multi-step Aggregation
+
 
 ## When RepartitionExec does not make sense and hurts performance
 
 ```SQL
--- Redundant RepartitionExec that hurts performance
+
 EXPLAIN SELECT env, count(*) FROM dimension_parquet GROUP BY env;
 +---------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | plan_type     | plan                                                                                                                                                                               |
@@ -91,22 +111,30 @@ EXPLAIN SELECT env, count(*) FROM dimension_parquet GROUP BY env;
 | physical_plan | ProjectionExec: expr=[env@0 as env, count(Int64(1))@1 as count(*)]                                                                                                                 |
 |               |   AggregateExec: mode=FinalPartitioned, gby=[env@0 as env], aggr=[count(Int64(1))]                                                                                                 |
 |               |     CoalesceBatchesExec: target_batch_size=8192                                                                                                                                    |
-|               |       RepartitionExec: partitioning=Hash([env@0], 16), input_partitions=16                                                                                                         |
-|               |         RepartitionExec: partitioning=RoundRobinBatch(16), input_partitions=1      -- This is NOT needed and HURTS performance                                                     |
+|               |       RepartitionExec: partitioning=Hash([env@0], 16), input_partitions=16              -- Repartition Hash                                                                        |
+|               |         RepartitionExec: partitioning=RoundRobinBatch(16), input_partitions=1           -- Repartition Round Robin                                                                 |
 |               |           AggregateExec: mode=Partial, gby=[env@0 as env], aggr=[count(Int64(1))]                                                                                                  |
 |               |             DataSourceExec: file_groups={1 group: [[Users/hoabinhnga.tran/datafusion-optimal-plans/testdata/dimension1/dimension_1.parquet]]}, projection=[env], file_type=parquet |
 |               |                                                                                                                                                                                    |
 +---------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-
--- Ticket: todo
+2 row(s) fetched. 
 ```
+ 
+![SubOptimalAggregate](SubOptimalAggregate.png)
 
-## Suboptimal Plan
+Figure: Sub-optimal Aggregation
+
+Better go with either plan in `Figure: Aggregation's Group-By Pipeline` or `Figure: Multi-step Aggregation`
+
+Ticket: todo
+
+
+## Even More Sub-optimal Plan
 
 ```SQL
--- Data is already sorted on Group-By key but the plan does not take advantage of it
+-- Data is already sorted on Group-By key but the plan was so sub-optimal
 
-EXPLAIN SELECT env, count(*) FROM dimension_parquet_sorted GROUP BY env;
+    EXPLAIN SELECT env, count(*) FROM dimension_parquet_sorted GROUP BY env;
 +---------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | plan_type     | plan                                                                                                                                                                                                                         |
 +---------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
@@ -126,41 +154,24 @@ EXPLAIN SELECT env, count(*) FROM dimension_parquet_sorted GROUP BY env;
 2 row(s) fetched. 
 ```
 
-### Better Plan 1: Has the knowledge the file is small and use one-step group-by pipeline without setting config param
+![SubOptimalPresortedAggregate](SubOptimalPresortedAggregate.png)
 
-Something like this
+Figure: Sub-optimal Pre-Sorted Aggregation
 
-```SQL
-+---------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| plan_type     | plan                                                                                                                                                                                                               |
-+---------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| logical_plan  | Projection: dimension_parquet_sorted.env, count(Int64(1)) AS count(*)                                                                                                                                              |
-|               |   Aggregate: groupBy=[[dimension_parquet_sorted.env]], aggr=[[count(Int64(1))]]                                                                                                                                    |
-|               |     TableScan: dimension_parquet_sorted projection=[env]                                                                                                                                                           |
-| physical_plan | ProjectionExec: expr=[env@0 as env, count(Int64(1))@1 as count(*)]                                                                                                                                                 |
-|               |   AggregateExec: mode=Single, gby=[env@0 as env], aggr=[count(Int64(1))], ordering_mode=Sorted     -- ordering_mode=Sorted is the key                                                                              |
-|               |     DataSourceExec: file_groups={1 group: [[Users/hoabinhnga.tran/datafusion-optimal-plans/testdata/dimension1/dimension_1.parquet]]}, projection=[env], output_ordering=[env@0 ASC NULLS LAST], file_type=parquet |
-|               |                                                                                                                                                                                                                    |
-+---------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-```
+### Better plans:
 
-### Better Plan 2: Have one-step group-by on many sorted streams/partitions
+1. Use `Single` aggregate & pipeline as in `Figure: Aggregation's Group-By Pipeline`
 
-Something like this (TODO: SEE IF CAN PUT TOGETHER THIS PLAN WITH SETTING CHANGES or MINOR CODE WORK)
+2. Split file groups into sorted N + target_partitions (N = 1, 2, 3, ...)
 
-```SQL
-+---------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| plan_type     | plan                                                                                                                                                                                                                         |
-+---------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| logical_plan  | Projection: dimension_parquet_sorted.env, count(Int64(1)) AS count(*)                                                                                                                                                        |
-|               |   Aggregate: groupBy=[[dimension_parquet_sorted.env]], aggr=[[count(Int64(1))]]                                                                                                                                              |
-|               |     TableScan: dimension_parquet_sorted projection=[env]                                                                                                                                                                     |
-| physical_plan | SortPreservingMergeExec: [env@1 ASC NULLS LAST]                                                                                                                                                                              |
-|               |   ProjectionExec: expr=[env@0 as env, count(Int64(1))@1 as count(*)]                                                                                                                                                         |          
-|               |      AggregateExec: mode=Single, gby=[env@0 as env], aggr=[count(Int64(1))], ordering_mode=Sorted                                                                                                                            |
-|               |         CoalesceBatchesExec: target_batch_size=8192                                                                                                                                                                          |
-|               |            RepartitionExec: partitioning=RoundRobinBatch(16), input_partitions=1                                                                                                                                             |
-|               |               DataSourceExec: file_groups={1 group: [[Users/hoabinhnga.tran/datafusion-optimal-plans/testdata/dimension1/dimension_1.parquet]]}, projection=[env], output_ordering=[env@0 ASC NULLS LAST], file_type=parquet |
-|               |                                                                                                                                                                                                                              |
-+---------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-```
+   This strategy is especially effective when data files are already partitioned and sorted by the group-by key.
+
+   ![OptimizedPresortedAggregate2](OptimizedPresortedAggregate2.png)
+
+
+3. Implement a specialized Repartition strategy—either Hash or Round Robin (or a new one)—that ensures rows with the same group key are placed in the same partition and remain sorted within each stream.
+
+    ![OptimizedPresortedAggregate1](OptimizedPresortedAggregate1.png)
+
+TODO: play with configurations to see how to do this (especially for the case of many files that are already partitioned and sorted by the group-by key ), if not possible, open a  ticket for this
+

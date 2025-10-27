@@ -16,7 +16,6 @@ SELECT * FROM dimension_parquet_sorted WHERE service = 'log' ORDER BY env, servi
 
 ```SQL
 
--- SortPreservingMergeExec: Merge already-sorted streams
 EXPLAIN SELECT * FROM dimension_parquet_sorted WHERE service = 'log' ORDER BY env, service, host;
 +---------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | plan_type     | plan                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
@@ -34,6 +33,8 @@ EXPLAIN SELECT * FROM dimension_parquet_sorted WHERE service = 'log' ORDER BY en
 2 row(s) fetched. 
 
 ```
+
+![SortPreservingMerge](./SortPreservingMerge.png)
 
 ```SQL
 -- Need to sort EACH streams before merging
@@ -56,4 +57,6 @@ EXPLAIN SELECT * FROM dimension_parquet WHERE service = 'log' ORDER BY env, serv
 2 row(s) fetched. 
 
 ```
+
+![SortAndMerge](./SortAndMerge.png)
 
