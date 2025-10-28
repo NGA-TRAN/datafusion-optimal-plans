@@ -1,0 +1,8 @@
+- Write `sqllogictest` to submit reproducer in open source DF
+- Write more involved `Rust` tests for cases that may need some code
+- Start practical complicated plans:
+   - date_bin with sorted data
+   - More input files into the join
+   - Smart partitioned hash join
+   - Distributed Plan
+   - ....

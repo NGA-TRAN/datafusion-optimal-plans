@@ -124,9 +124,10 @@ EXPLAIN SELECT env, count(*) FROM dimension_parquet GROUP BY env;
 
 Figure: Sub-optimal Aggregation
 
-Better go with either plan in `Figure: Aggregation's Group-By Pipeline` or `Figure: Multi-step Aggregation`
+Better go with either plan in `Figure: Aggregation's Group-By Hash` or `Figure: Multi-step Aggregation`
 
-Ticket: todo
+- Tickett: https://github.com/apache/datafusion/issues/18341
+- Reproducer in datafusion repo: https://github.com/apache/datafusion/pull/18343
 
 
 ## Even More Sub-optimal Plan
@@ -162,7 +163,7 @@ Figure: Sub-optimal Pre-Sorted Aggregation
 
 1. Use `Single` aggregate & pipeline as in `Figure: Aggregation's Group-By Pipeline`
 
-2. Split file groups into sorted N * target_partitions (N = 1, 2, 3, ...)
+2. Split file groups into sorted N *     target_partitions (N = 1, 2, 3, ...)
 
    This strategy is especially effective when data files are already partitioned and sorted by the group-by key.
 

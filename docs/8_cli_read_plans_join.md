@@ -130,12 +130,14 @@ ORDER BY f.f_dkey, timestamp;
 
 ```
 
-Note: No SortExec because data is already sorted on `f_dkey, timestamp`
+**Note:** No SortExec because data is already sorted on `f_dkey, timestamp`
 
 ![JoinOneStream](JoinOneStream.png)
 
+Figure: Hash Join with Single Input Partition/Stream Both Sides
 
-## Multi-stream/partition
+
+## Multiple Streams/Partitions
 
 ```SQL
 
@@ -180,6 +182,8 @@ ORDER BY f.f_dkey, timestamp;
 ```
 
 ![JoinMultiStream](JoinMultiStream.png)
+
+Figure: CollectLeft Hash Join with Multi Input Streams
 
 - HashJoin with mode=CollectLeft:
     - Still one hash table for all build-side streams
