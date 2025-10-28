@@ -1,8 +1,22 @@
 ## Install and run datafusion-cli
 
-- Install:  `cargo install datafusion-cli`
-  Or build it from the repo `https://github.com/apache/datafusion`. Remember to `cd datafusion-cli` and run `cargo build`
-- Run:  `datafusion-cli` or `datafusion-cli --maxrows 100` to display max 100 rows per command
+- Install: Either
+
+   1. `brew install datafusion`
+   2. If you have Rust: `cargo install datafusion-cli`
+   3. Build from source
+      ```shell
+      git clone https://github.com/apache/datafusion.git
+      cd datafusion/datafusion-cli
+      cargo build --release
+      ```
+
+- Check version: Make sure 50 or higher
+    ```shell
+    % datafusion-cli --version 
+    datafusion-cli 50.1.0
+    ```
+- Run: `datafusion-cli` or `datafusion-cli --maxrows 100` to display max 100 rows per command
 
 ## Common CLI commands
 
