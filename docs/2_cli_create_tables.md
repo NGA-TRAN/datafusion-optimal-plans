@@ -93,6 +93,19 @@ show columns from dimension_csv;
 ```
 
 ```SQL
+describe dimension_csv;
++-------------+-----------+-------------+
+| column_name | data_type | is_nullable |
++-------------+-----------+-------------+
+| d_dkey      | Utf8      | YES         |
+| env         | Utf8      | YES         |
+| service     | Utf8      | YES         |
+| host        | Utf8      | YES         |
++-------------+-----------+-------------+
+4 row(s) fetched. 
+```
+
+```SQL
 select * from dimension_csv;
 +--------+------+---------+------+
 | d_dkey | env  | service | host |
