@@ -40,7 +40,7 @@ EXPLAIN SELECT * FROM dimension_csv_sorted WHERE service = 'log';
 
 ```
 
-![repartition](./Repartition.png)
+![repartition](figures/Repartition.png)
 
 ## Why Repartitioned to 16 of them?
 

@@ -132,7 +132,7 @@ ORDER BY f.f_dkey, timestamp;
 
 **Note:** No SortExec because data is already sorted on `f_dkey, timestamp`
 
-![JoinOneStream](JoinOneStream.png)
+![JoinOneStream](figures/JoinOneStream.png)
 
 Figure: Hash Join with Single Input Partition/Stream Both Sides
 
@@ -181,7 +181,7 @@ ORDER BY f.f_dkey, timestamp;
 2 row(s) fetched. 
 ```
 
-![JoinMultiStream](JoinMultiStream.png)
+![JoinMultiStream](figures/JoinMultiStream.png)
 
 Figure: CollectLeft Hash Join with Multi Input Streams
 

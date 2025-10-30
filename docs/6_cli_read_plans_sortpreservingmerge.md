@@ -24,7 +24,7 @@ EXPLAIN SELECT * FROM dimension_parquet_sorted WHERE service = 'log' ORDER BY en
 |               |   Filter: dimension_parquet_sorted.service = Utf8View("log")                                                                                                                                                                                                                                                                                                                                                                                                               |
 |               |     TableScan: dimension_parquet_sorted projection=[d_dkey, env, service, host], partial_filters=[dimension_parquet_sorted.service = Utf8View("log")]                                                                                                                                                                                                                                                                                                                      |
 | physical_plan | SortPreservingMergeExec: [env@1 ASC NULLS LAST, service@2 ASC NULLS LAST, host@3 ASC NULLS LAST]                                                                                                                                                                                                                                                                                                                                                                           |
-|               |   CoalesceBatchesExec: target_batch_size=8192                                                                                                                                                                                                                                                                                                                                                                                                                              |
+|               |   CoalesceBatchesExec: xtarget_batch_size=8192                                                                                                                                                                                                                                                                                                                                                                                                                              |
 |               |     FilterExec: service@2 = log                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 |               |       RepartitionExec: partitioning=RoundRobinBatch(16), input_partitions=1                                                                                                                                                                                                                                                                                                                                                                                                |
 |               |         DataSourceExec: file_groups={1 group: [[Users/hoabinhnga.tran/datafusion-optimal-plans/testdata/dimension1/dimension_1.parquet]]}, projection=[d_dkey, env, service, host], output_ordering=[env@1 ASC NULLS LAST, service@2 ASC NULLS LAST, host@3 ASC NULLS LAST], file_type=parquet, predicate=service@2 = log, pruning_predicate=service_null_count@2 != row_count@3 AND service_min@0 <= log AND log <= service_max@1, required_guarantees=[service in (log)] |
@@ -34,7 +34,7 @@ EXPLAIN SELECT * FROM dimension_parquet_sorted WHERE service = 'log' ORDER BY en
 
 ```
 
-![SortPreservingMerge](./SortPreservingMerge.png)
+![SortPreservingMerge](figures/SortPreservingMerge.png)
 
 ```SQL
 -- Need to sort EACH streams before merging
@@ -58,5 +58,5 @@ EXPLAIN SELECT * FROM dimension_parquet WHERE service = 'log' ORDER BY env, serv
 
 ```
 
-![SortAndMerge](./SortAndMerge.png)
+![SortAndMerge](figures/SortAndMerge.png)
 

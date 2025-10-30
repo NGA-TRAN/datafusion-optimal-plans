@@ -37,7 +37,7 @@ EXPLAIN SELECT env, count(*) FROM dimension_parquet_sorted GROUP BY env;
 2 row(s) fetched. 
 ```
 
-![GroupByPipeline](GroupByPipeline.png)
+![GroupByPipeline](figures/GroupByPipeline.png)
 
 Figure: Aggregation's Group-By Pipeline
 
@@ -60,7 +60,7 @@ EXPLAIN SELECT env, count(*) FROM dimension_parquet GROUP BY env;
 2 row(s) fetched. 
 ```
 
-![GroupByHash](GroupByHash.png)
+![GroupByHash](figures/GroupByHash.png)
 
 Figure: Aggregation's Group-By Hash
 
@@ -92,7 +92,7 @@ EXPLAIN SELECT env, count(*) FROM dimension_csv GROUP BY env;
 
 ```
 
-![MultiStepAggregate](MultiStepAggregate.png)
+![MultiStepAggregate](figures/MultiStepAggregate.png)
 
 Figure: Multi-step Aggregation
 
@@ -120,7 +120,7 @@ EXPLAIN SELECT env, count(*) FROM dimension_parquet GROUP BY env;
 2 row(s) fetched. 
 ```
  
-![SubOptimalAggregate](SubOptimalAggregate.png)
+![SubOptimalAggregate](figures/SubOptimalAggregate.png)
 
 Figure: Sub-optimal Aggregation
 
@@ -155,7 +155,7 @@ Better go with either plan in `Figure: Aggregation's Group-By Hash` or `Figure: 
 2 row(s) fetched. 
 ```
 
-![SubOptimalPresortedAggregate](SubOptimalPresortedAggregate.png)
+![SubOptimalPresortedAggregate](figures/SubOptimalPresortedAggregate.png)
 
 Figure: Sub-optimal Pre-Sorted Aggregation
 
@@ -167,12 +167,12 @@ Figure: Sub-optimal Pre-Sorted Aggregation
 
    This strategy is especially effective when data files are already partitioned and sorted by the group-by key.
 
-   ![OptimizedPresortedAggregate2](OptimizedPresortedAggregate2.png)
+   ![OptimizedPresortedAggregate2](figures/OptimizedPresortedAggregate2.png)
 
 
 3. Implement a specialized Repartition strategy—either Hash or Round Robin (or a new one)—that ensures rows with the same group key are placed in the same partition and remain sorted within each stream.
 
-    ![OptimizedPresortedAggregate1](OptimizedPresortedAggregate1.png)
+    ![OptimizedPresortedAggregate1](figures/OptimizedPresortedAggregate1.png)
 
 TODO: play with configurations to see how to do this (especially for the case of many files that are already partitioned and sorted by the group-by key ), if not possible, open a  ticket for this
 
