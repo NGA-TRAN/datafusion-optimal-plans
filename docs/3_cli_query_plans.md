@@ -180,3 +180,7 @@ EXPLAIN VERBOSE SELECT * FROM dimension_csv;
 75 row(s) fetched. 
 
 ```
+
+- [Code](https://github.com/apache/datafusion/blob/e65dafe7330f0324b28d9037f4e5a73cf12e99ce/datafusion/core/src/physical_planner.rs#L285) that maps `final logical plan` to `initial physical plan`
+- [Code](https://github.com/apache/datafusion/blob/e65dafe7330f0324b28d9037f4e5a73cf12e99ce/datafusion/optimizer/src/optimizer.rs#L229) for `logical optimizer rules`
+- [Code](https://github.com/apache/datafusion/blob/e65dafe7330f0324b28d9037f4e5a73cf12e99ce/datafusion/physical-optimizer/src/optimizer.rs#L83) for `physical optimizer rules`
